@@ -1,90 +1,141 @@
-import pygame
-import numpy as np
-from math import pi as PI
-from utils import Point
+import math
 import random
+import colorsys
+import argparse
+from utils import Perlin2D
 
-# constants
-image_size_x = 800
-image_size_y = 600
-resolution = 20
-
-left_x = int(image_size_x * -0.5)
-right_x = int(image_size_x * 1.5)
-top_y = int(image_size_y * -0.5)
-bottom_y = int(image_size_y * 1.5)
-# print(f"Left: {left_x}, Right: {right_x}, Top: {top_y}, Bottom: {bottom_y}")
-
-num_columns = (right_x - left_x) // resolution
-num_rows = (bottom_y - top_y) // resolution
-# print(f"Num col: {num_columns}, Num row: {num_rows}")
-angles = np.zeros((num_columns, num_rows))
-start_points = [Point(random.randint(0, image_size_x), random.randint(0, image_size_y)) for _ in range(1)]
-
-# pygame setup
-pygame.init()
-screen = pygame.display.set_mode((image_size_x, image_size_y))
-clock = pygame.time.Clock()
-running = True
-dt = 0
+import pygame
+import pygame.gfxdraw
+import numpy as np
 
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    screen.fill("white")
+def flow_field(
+    width=800,
+    height=800,
+    color=100,
+    backgrondColor=(0, 0, 0),
+    perlinFactorW=2,
+    perlinFactorH=2,
+    step=0.001,
+    scale=2,
+):
+    # scale the image 2x for antialias
+    img_width = width * scale
+    img_height = height * scale
 
-    # define angles
-    for column in range(num_columns):
-        for row in range(num_rows):
-            angles[column, row] = (row / float(num_rows)) * PI
-            angles[column, row] = np.cos((row / float(num_rows)) * PI) + np.sin((column / float(num_columns)) * PI)
-            # print(f"Angle at {column} {row}: {(row / float(num_rows)) * PI}")
+    seed = random.randint(0, 100000000)
 
-    # draw lines (vectors)
-    line_len = 10
-    for column in range(num_columns):
-        for row in range(num_rows):
-            angle = angles[column, row]
-            vec_x = line_len * np.cos(angle)
-            vec_y = line_len * np.sin(angle)
+    # set random seed
+    np.random.seed(seed)
 
-            x = column * resolution - image_size_x // 2
-            y = row * resolution - image_size_y // 2
-            pygame.draw.circle(
-                screen,
-                "black",
-                (x, y),
-                2
-            )
-            pygame.draw.line(
-                screen,
-                "black",
-                (x, y),
-                (x + vec_x, y + vec_y),
+    pygame.init()
+    screen = pygame.display.set_mode((width, height))
+    screen.fill(pygame.Color(*backgrondColor))
+    clock = pygame.time.Clock()
+    running = True
+    dt = 0
+
+    # get perlin noise
+    p_noise = Perlin2D(img_width, img_height, perlinFactorW, perlinFactorH)
+    MAX_LENGTH = 2 * img_width
+    STEP_SIZE = step * max(img_width, img_height)
+    NUM = int(img_width * img_height / 10000)
+    POINTS = [
+        (random.randint(0, img_width - 1), random.randint(0, img_height - 1))
+        for i in range(NUM)
+    ]
+
+    # start drawing the lines
+    for k, (x_s, y_s) in enumerate(POINTS):
+        print(f"{100 * (k + 1) / len(POINTS):.1f}".rjust(5) + "% Complete", end="\r")
+        c_len = 0
+
+        while c_len < MAX_LENGTH:
+            sat = 200 * (MAX_LENGTH - c_len) / MAX_LENGTH
+            hue = (color + 130 * (img_height - y_s) / img_height) % 360
+            hsv = colorsys.hsv_to_rgb(hue / 255, sat / 255, 1)
+            float_rgb = (
+                int(hsv[0] * 255),
+                int(hsv[1] * 255),
+                int(hsv[2] * 255),
             )
 
-    # Draw Curves
-    for point in start_points:
-        step_length = image_size_x * 0.002
-        num_steps = 100
-        x = point.x
-        y = point.y
-        for i in range(num_steps):
-            pygame.draw.circle(screen, "#4361ee", (x, y), 1)
-            x_offset = min(max(x - left_x, 0), right_x)
-            y_offset = min(max(y - top_y, 0), bottom_y)
+            angle = p_noise[int(x_s), int(y_s)] * math.pi
 
-            column_index = int(x_offset / resolution)
-            row_index = int(y_offset / resolution)
+            x_f = x_s + STEP_SIZE * math.cos(angle)
+            y_f = y_s + STEP_SIZE * math.sin(angle)
 
-            angle = angles[column_index, row_index]
-            x += step_length * np.cos(angle)
-            y += step_length * np.sin(angle)
+            # pygame.gfxdraw.pixel(screen, int(x_s), int(y_s), float_rgb)
+            pygame.gfxdraw.line(
+                screen,
+                int(x_s),
+                int(y_s),
+                int(x_f),
+                int(y_f),
+                float_rgb,
+            )
+            # pygame.draw.line(
+            #     screen,
+            #     pygame.Color(float_rgb[0], float_rgb[1], float_rgb[2]),
+            #     (x_s, y_s),
+            #     (x_f, y_f),
+            # )
 
-    pygame.display.flip()
+            c_len += math.sqrt((x_f - x_s) ** 2 + (y_f - y_s) ** 2)
 
-    dt = clock.tick(6) / 1000
+            if (
+                x_f < 0
+                or x_f >= img_width
+                or y_f < 0
+                or y_f >= img_height
+                or c_len > MAX_LENGTH
+            ):
+                break
+            else:
+                x_s, y_s = x_f, y_f
 
-pygame.quit()
+    # start gameloop
+    while running:
+        # poll for events
+        # pygame.QUIT event means the user clicked X to close your window
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # flip() the display to put your work on screen
+        pygame.display.flip()
+
+        # limits FPS to 60
+        # dt is delta time in seconds since last frame, used for framerate-
+        # independent physics.
+        dt = clock.tick(60) / 1000
+
+    pygame.quit()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="flow field generator")
+
+    parser.add_argument("--width", default=800, type=int, help="Width of the image")
+    parser.add_argument("--height", default=800, type=int, help="Height of the image")
+    parser.add_argument(
+        "--perlin_factor_w", default=2, type=int, help="Perlin factor for width"
+    )
+    parser.add_argument(
+        "--perlin_factor_h", default=2, type=int, help="Perlin factor for height"
+    )
+    parser.add_argument("--step", default=0.001, type=float, help="Step value")
+    parser.add_argument("--color", default=100, type=str, help="Color option")
+    parser.add_argument("--scale", default=2, type=float, help="Scale value")
+
+    args = parser.parse_args()
+
+    flow_field(
+        width=args.width,
+        height=args.height,
+        color=args.color,
+        perlinFactorW=args.perlin_factor_w,
+        perlinFactorH=args.perlin_factor_h,
+        step=args.step,
+        scale=args.scale,
+    )

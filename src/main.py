@@ -2,7 +2,7 @@ import math
 import random
 import colorsys
 import argparse
-from flow_fields.utils import Perlin2D
+from utils import Perlin2D
 
 import pygame
 import pygame.gfxdraw

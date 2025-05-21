@@ -1,84 +1,8 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "flow-fields"
-dynamic = ["version"]
-description = 'Simple flow field made with pygame'
-readme = "README.md"
-requires-python = ">=3.8"
-license = "MIT"
-keywords = []
-authors = [
-  { name = "Hyde", email = "seokjinyoo0716@gmail.com" },
-]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-]
+version = "0.1.0"
+requires-python = ">=3.13"
 dependencies = [
-  "pygame",
-  "numpy",
-]
-
-[project.urls]
-Documentation = "https://github.com/unknown/flow-fields#readme"
-Issues = "https://github.com/unknown/flow-fields/issues"
-Source = "https://github.com/unknown/flow-fields"
-
-[tool.hatch.version]
-path = "src/flow_fields/__about__.py"
-
-[tool.hatch.envs.default]
-dependencies = [
-  "coverage[toml]>=6.5",
-  "pytest",
-]
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-  "- coverage combine",
-  "coverage report",
-]
-cov = [
-  "test-cov",
-  "cov-report",
-]
-
-[[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
-
-[tool.hatch.envs.types]
-dependencies = [
-  "mypy>=1.0.0",
-]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/flow_fields tests}"
-
-[tool.coverage.run]
-source_pkgs = ["flow_fields", "tests"]
-branch = true
-parallel = true
-omit = [
-  "src/flow_fields/__about__.py",
-]
-
-[tool.coverage.paths]
-flow_fields = ["src/flow_fields", "*/flow-fields/src/flow_fields"]
-tests = ["tests", "*/flow-fields/tests"]
-
-[tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
+    "numpy>=2.2.6",
+    "pygame>=2.6.1",
 ]

@@ -11,7 +11,7 @@ class Arrow:
         end: Vec2D,
         tip_size: float,
         angle: float = math.pi / 4,
-        thickness: float = 0.01,
+        thickness: float = 0.001,
         color: Vec3D = Vec3D(0, 0, 0),
     ) -> None:
         self.start = start

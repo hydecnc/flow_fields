@@ -39,6 +39,9 @@ class Vec2D:
     def __truediv__(self, val: float) -> Vec2D:
         return Vec2D(self.x / val, self.y / val)
 
+    def __str__(self) -> str:
+        return f"({self.x}, {self.y})"
+
 
 class Vec3D:
     def __init__(self, x: float, y: float, z: float) -> None:
@@ -84,3 +87,6 @@ class Vec3D:
 
     def __truediv__(self, val: float) -> Vec3D:
         return Vec3D(self.x / val, self.y / val, self.z / val)
+
+    def __str__(self) -> str:
+        return f"({self.x}, {self.y}, {self.z})"

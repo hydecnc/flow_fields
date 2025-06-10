@@ -268,13 +268,10 @@ def noise(x: float, y: float) -> float:
     Perlin noise implementation based on Ken Perlin's 2002 paper.
     Note that x and y expected to be normalized from 0.0 to 1.0.
     """
-    scaled_x = x * 255
-    scaled_y = y * 255
-
-    xi = math.floor(scaled_x) & 255
-    yi = math.floor(scaled_y) & 255
-    xf = scaled_x - math.floor(scaled_x)
-    yf = scaled_y - math.floor(scaled_y)
+    xi = math.floor(x) & 255
+    yi = math.floor(y) & 255
+    xf = x - math.floor(x)
+    yf = y - math.floor(y)
 
     u, v = fade(xf), fade(yf)
 
@@ -291,11 +288,30 @@ def noise(x: float, y: float) -> float:
 
 
 def grad(hash: int, x: float, y: float) -> float:
-    h = hash & 7
-    u = x if h < 4 else y
-    v = y if h < 4 else x
+    h = hash & 3
+    if h == 0:
+        return x  # gradient (1, 0)
+    elif h == 1:
+        return -x  # gradient (-1, 0)
+    elif h == 2:
+        return y  # gradient (0, 1)
+    else:
+        return -y  # gradient (0, -1)
 
-    return (u if h & 1 == 0 else -u) + (v if h & 2 == 0 else -v)
+
+def fractal_brownian_motion(x: int, y: int, numOctaves: int) -> float:
+    result = 0.0
+    amplitude = 1.0
+    frequency = 0.03
+
+    for octave in range(numOctaves):
+        n = amplitude * noise(x * frequency, y * frequency)
+        result += n
+
+        amplitude *= 0.5
+        frequency *= 2.0
+
+    return result
 
 
 def fade(t: float) -> float:

@@ -3,14 +3,15 @@ import cairo
 
 from arrow import Arrow
 from particle import Particle
-from perlin import lerp, noise
+from perlin import fractal_brownian_motion, lerp
 from vector import Vec2D, Vec3D
 
 WIDTH, HEIGHT = 1000, 1000
 BACKGROUND_COLOR = Vec3D(1.0, 1.0, 1.0)
 PARTICLE_RADIUS = 0.002
-NUM_COLS = 200
-NUM_ROWS = 200
+NUM_COLS = 100
+NUM_ROWS = 100
+NUM_OCTAVES = 6
 
 
 def draw_curve(
@@ -27,6 +28,7 @@ def draw_curve(
     ctx.move_to(curve.x, curve.y)
 
     for _ in range(num_steps):
+        # print(curve)
         column_index = int(curve.x * NUM_COLS)
         row_index = int(curve.y * NUM_ROWS)
 
@@ -64,9 +66,7 @@ if __name__ == "__main__":
     for row in range(NUM_ROWS + 1):
         grid_row = []
         for col in range(NUM_COLS + 1):
-            # grid_row.append(Particle(pos.x, pos.y, (row / NUM_ROWS) * math.pi))
-            angle = (noise(pos.x, pos.y) + 1) / 2
-            angle = lerp(angle, 0, 2 * math.pi)
+            angle = lerp(fractal_brownian_motion(row, col, NUM_OCTAVES), 0, 2 * math.pi)
             grid_row.append(Particle(pos.x, pos.y, angle))
             pos.x += col_step
         grid.append(grid_row)
@@ -78,13 +78,13 @@ if __name__ == "__main__":
     for row in grid:
         for particle in row:
             # draw the arrow
-            # step = (
-            #     Vec2D(
-            #         math.cos(particle.angle),
-            #         math.sin(particle.angle),
-            #     )
-            #     / 100
-            # )
+            step = (
+                Vec2D(
+                    math.cos(particle.angle),
+                    math.sin(particle.angle),
+                )
+                / 100
+            )
             # arrow = Arrow(particle.pos(), particle.pos() + step, 0.005)
             # arrow.draw(ctx)
 

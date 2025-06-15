@@ -5,4 +5,5 @@ requires-python = ">=3.13"
 dependencies = [
     "numpy>=2.2.6",
     "pycairo>=1.28.0",
+    "tqdm>=4.67.1",
 ]

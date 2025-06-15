@@ -1,322 +1,79 @@
+import json
 import math
-
-P = [
-    151,
-    160,
-    137,
-    91,
-    90,
-    15,
-    131,
-    13,
-    201,
-    95,
-    96,
-    53,
-    194,
-    233,
-    7,
-    225,
-    140,
-    36,
-    103,
-    30,
-    69,
-    142,
-    8,
-    99,
-    37,
-    240,
-    21,
-    10,
-    23,
-    190,
-    6,
-    148,
-    247,
-    120,
-    234,
-    75,
-    0,
-    26,
-    197,
-    62,
-    94,
-    252,
-    219,
-    203,
-    117,
-    35,
-    11,
-    32,
-    57,
-    177,
-    33,
-    88,
-    237,
-    149,
-    56,
-    87,
-    174,
-    20,
-    125,
-    136,
-    171,
-    168,
-    68,
-    175,
-    74,
-    165,
-    71,
-    134,
-    139,
-    48,
-    27,
-    166,
-    77,
-    146,
-    158,
-    231,
-    83,
-    111,
-    229,
-    122,
-    60,
-    211,
-    133,
-    230,
-    220,
-    105,
-    92,
-    41,
-    55,
-    46,
-    245,
-    40,
-    244,
-    102,
-    143,
-    54,
-    65,
-    25,
-    63,
-    161,
-    1,
-    216,
-    80,
-    73,
-    209,
-    76,
-    132,
-    187,
-    208,
-    89,
-    18,
-    169,
-    200,
-    196,
-    135,
-    130,
-    116,
-    188,
-    159,
-    86,
-    164,
-    100,
-    109,
-    198,
-    173,
-    186,
-    3,
-    64,
-    52,
-    217,
-    226,
-    250,
-    124,
-    123,
-    5,
-    202,
-    38,
-    147,
-    118,
-    126,
-    255,
-    82,
-    85,
-    212,
-    207,
-    206,
-    59,
-    227,
-    47,
-    16,
-    58,
-    17,
-    182,
-    189,
-    28,
-    42,
-    223,
-    183,
-    170,
-    213,
-    119,
-    248,
-    152,
-    2,
-    44,
-    154,
-    163,
-    70,
-    221,
-    153,
-    101,
-    155,
-    167,
-    43,
-    172,
-    9,
-    129,
-    22,
-    39,
-    253,
-    19,
-    98,
-    108,
-    110,
-    79,
-    113,
-    224,
-    232,
-    178,
-    185,
-    112,
-    104,
-    218,
-    246,
-    97,
-    228,
-    251,
-    34,
-    242,
-    193,
-    238,
-    210,
-    144,
-    12,
-    191,
-    179,
-    162,
-    241,
-    81,
-    51,
-    145,
-    235,
-    249,
-    14,
-    239,
-    107,
-    49,
-    192,
-    214,
-    31,
-    181,
-    199,
-    106,
-    157,
-    184,
-    84,
-    204,
-    176,
-    115,
-    121,
-    50,
-    45,
-    127,
-    4,
-    150,
-    254,
-    138,
-    236,
-    205,
-    93,
-    222,
-    114,
-    67,
-    29,
-    24,
-    72,
-    243,
-    141,
-    128,
-    195,
-    78,
-    66,
-    215,
-    61,
-    156,
-    180,
-]
-
-# double the array size
-P = P + P
-
-
-def noise(x: float, y: float) -> float:
-    """
-    Perlin noise implementation based on Ken Perlin's 2002 paper.
-    Note that x and y expected to be normalized from 0.0 to 1.0.
-    """
-    xi = math.floor(x) & 255
-    yi = math.floor(y) & 255
-    xf = x - math.floor(x)
-    yf = y - math.floor(y)
-
-    u, v = fade(xf), fade(yf)
-
-    aa = P[P[xi] + yi]  # bottom left
-    ab = P[P[xi] + yi + 1]  # top left
-    ba = P[P[xi + 1] + yi]  # bottom right
-    bb = P[P[xi + 1] + yi + 1]  # top right
-
-    return lerp(
-        v,
-        lerp(u, grad(aa, xf, yf), grad(ba, xf - 1, yf)),
-        lerp(u, grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1)),
-    )
-
-
-def grad(hash: int, x: float, y: float) -> float:
-    h = hash & 3
-    if h == 0:
-        return x  # gradient (1, 0)
-    elif h == 1:
-        return -x  # gradient (-1, 0)
-    elif h == 2:
-        return y  # gradient (0, 1)
-    else:
-        return -y  # gradient (0, -1)
-
-
-def fractal_brownian_motion(x: int, y: int, numOctaves: int) -> float:
-    result = 0.0
-    amplitude = 1.0
-    frequency = 0.03
-
-    for octave in range(numOctaves):
-        n = amplitude * noise(x * frequency, y * frequency)
-        result += n
-
-        amplitude *= 0.5
-        frequency *= 2.0
-
-    return result
+import random
 
 
 def fade(t: float) -> float:
+    """Fade function: 6t^5 - 15t^4 + 10t^3"""
     return t * t * t * (t * (t * 6 - 15) + 10)
 
 
 def lerp(t: float, a: float, b: float) -> float:
+    """Linear interpolation between a and b with t."""
     return a + t * (b - a)
+
+
+def shuffle(arr: list) -> None:
+    """Mutate arr by shuffling all elements randomly."""
+    for e in range(len(arr) - 1, 0, -1):
+        index = random.randint(0, e)
+        arr[index], arr[e] = arr[e], arr[index]
+
+
+class Perlin2D:
+    def __init__(self, shuffle_p=True) -> None:
+        with open("src/permutation_table.json", "r") as file:
+            self.P = json.load(file)
+            if shuffle_p:
+                shuffle(self.P)
+            self.P = self.P + self.P
+
+    def noise(self, x: float, y: float) -> float:
+        """
+        Perlin noise implementation based on Ken Perlin's 2002 paper.
+        Note that x and y expected to be normalized from 0.0 to 1.0.
+        """
+        xi = math.floor(x) & 255
+        yi = math.floor(y) & 255
+        xf = x - math.floor(x)
+        yf = y - math.floor(y)
+
+        u, v = fade(xf), fade(yf)
+
+        aa = self.P[self.P[xi] + yi]  # bottom left
+        ab = self.P[self.P[xi] + yi + 1]  # top left
+        ba = self.P[self.P[xi + 1] + yi]  # bottom right
+        bb = self.P[self.P[xi + 1] + yi + 1]  # top right
+
+        return lerp(
+            v,
+            lerp(u, self.grad(aa, xf, yf), self.grad(ba, xf - 1, yf)),
+            lerp(u, self.grad(ab, xf, yf - 1), self.grad(bb, xf - 1, yf - 1)),
+        )
+
+    def grad(self, hash: int, x: float, y: float) -> float:
+        """Return the dot product of each corner of the cell."""
+        h = hash & 3
+        if h == 0:
+            return x  # gradient (1, 0)
+        elif h == 1:
+            return -x  # gradient (-1, 0)
+        elif h == 2:
+            return y  # gradient (0, 1)
+        else:
+            return -y  # gradient (0, -1)
+
+    def fractal_brownian_motion(
+        self, x: int, y: int, numOctaves: int, amplitude=1.0, frequency=0.03
+    ) -> float:
+        """Fractal Brownian Motion for better noise results."""
+        result = 0.0
+
+        for _ in range(numOctaves):
+            n = amplitude * self.noise(x * frequency, y * frequency)
+            result += n
+
+            amplitude *= 0.5
+            frequency *= 2.0
+
+        return result

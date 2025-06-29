@@ -1,5 +1,6 @@
-import cairo
 import math
+
+import cairo
 
 from vector import Vec2D, Vec3D
 
@@ -12,16 +13,18 @@ class Arrow:
         tip_size: float,
         angle: float = math.pi / 4,
         thickness: float = 0.001,
-        color: Vec3D = Vec3D(0, 0, 0),
+        color: Vec3D | None = None,
     ) -> None:
-        self.start = start
-        self.end = end
-        self.tip_size = tip_size
-        self.angle = angle / 2
-        self.thickness = thickness
-        self.color = color
+        if color is None:
+            color = Vec3D(0, 0, 0)
+        self.start: Vec2D = start
+        self.end: Vec2D = end
+        self.tip_size: float = tip_size
+        self.angle: float = angle / 2
+        self.thickness: float = thickness
+        self.color: Vec3D = color
 
-    def draw(self, ctx: cairo.Context) -> None:
+    def draw(self, ctx: cairo.Context[cairo.ImageSurface]) -> None:
         # set color and arrow width
         ctx.set_source_rgb(self.color.x, self.color.y, self.color.z)
         ctx.set_line_width(self.thickness)

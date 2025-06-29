@@ -13,7 +13,7 @@ def lerp(t: float, a: float, b: float) -> float:
     return a + t * (b - a)
 
 
-def shuffle(arr: list) -> None:
+def shuffle(arr: list[int]) -> None:
     """Mutate arr by shuffling all elements randomly."""
     for e in range(len(arr) - 1, 0, -1):
         index = random.randint(0, e)
@@ -21,12 +21,12 @@ def shuffle(arr: list) -> None:
 
 
 class Perlin2D:
-    def __init__(self, shuffle_p=True) -> None:
+    def __init__(self, shuffle_p: bool = True) -> None:
         with open("src/permutation_table.json", "r") as file:
-            self.P = json.load(file)
+            self.perm: list[int] = json.load(file)
             if shuffle_p:
-                shuffle(self.P)
-            self.P = self.P + self.P
+                shuffle(self.perm)
+            self.perm = self.perm + self.perm
 
     def noise(self, x: float, y: float) -> float:
         """
@@ -40,10 +40,10 @@ class Perlin2D:
 
         u, v = fade(xf), fade(yf)
 
-        aa = self.P[self.P[xi] + yi]  # bottom left
-        ab = self.P[self.P[xi] + yi + 1]  # top left
-        ba = self.P[self.P[xi + 1] + yi]  # bottom right
-        bb = self.P[self.P[xi + 1] + yi + 1]  # top right
+        aa = self.perm[self.perm[xi] + yi]  # bottom left
+        ab = self.perm[self.perm[xi] + yi + 1]  # top left
+        ba = self.perm[self.perm[xi + 1] + yi]  # bottom right
+        bb = self.perm[self.perm[xi + 1] + yi + 1]  # top right
 
         return lerp(
             v,
@@ -64,7 +64,12 @@ class Perlin2D:
             return -y  # gradient (0, -1)
 
     def fractal_brownian_motion(
-        self, x: int, y: int, numOctaves: int, amplitude=1.0, frequency=0.03
+        self,
+        x: int,
+        y: int,
+        numOctaves: int,
+        amplitude: float = 1.0,
+        frequency: float = 0.03,
     ) -> float:
         """Fractal Brownian Motion for better noise results."""
         result = 0.0

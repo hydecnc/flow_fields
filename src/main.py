@@ -21,8 +21,10 @@ def draw_curve(
     num_steps: int,
     step_size: float = 0.003,
     width: float = 0.002,
-    color: Vec3D = Vec3D(0, 1, 0),
+    color: Vec3D | None = None,
 ) -> None:
+    if color is None:
+        color = Vec3D(0, 1, 0)
     curve = start_point
     ctx.set_source_rgb(color.r, color.g, color.b)
     ctx.set_line_width(width)
@@ -63,12 +65,12 @@ if __name__ == "__main__":
     perlin_2d = Perlin2D()
 
     # Add particles to grid
-    grid = []
+    grid: list[list[Particle]] = []
     row_step = 1 / NUM_ROWS
     col_step = 1 / NUM_COLS
     pos = Vec2D(0, 0)
     for row in range(NUM_ROWS + 1):
-        grid_row = []
+        grid_row: list[Particle] = []
         for col in range(NUM_COLS + 1):
             angle = lerp(
                 perlin_2d.fractal_brownian_motion(row, col, NUM_OCTAVES), 0, 2 * math.pi

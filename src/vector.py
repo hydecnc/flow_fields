@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import math
+from typing import override
 
 
 class Vec2D:
     def __init__(self, x: float, y: float) -> None:
-        self.x = x
-        self.y = y
+        self.x: float = x
+        self.y: float = y
 
     @property
     def r(self):
@@ -39,15 +40,16 @@ class Vec2D:
     def __truediv__(self, val: float) -> Vec2D:
         return Vec2D(self.x / val, self.y / val)
 
+    @override
     def __str__(self) -> str:
         return f"({self.x}, {self.y})"
 
 
 class Vec3D:
     def __init__(self, x: float, y: float, z: float) -> None:
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x: float = x
+        self.y: float = y
+        self.z: float = z
 
     @property
     def r(self):
@@ -88,5 +90,6 @@ class Vec3D:
     def __truediv__(self, val: float) -> Vec3D:
         return Vec3D(self.x / val, self.y / val, self.z / val)
 
+    @override
     def __str__(self) -> str:
         return f"({self.x}, {self.y}, {self.z})"

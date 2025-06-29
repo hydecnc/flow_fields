@@ -1,11 +1,12 @@
+import colorsys
 import math
+
 import cairo
+from tqdm import tqdm
 
 from particle import Particle
 from perlin import Perlin2D, lerp
 from vector import Vec2D, Vec3D
-
-from tqdm import tqdm
 
 WIDTH, HEIGHT = 1600, 1600
 BACKGROUND_COLOR = Vec3D(0.0, 0.0, 0.0)
@@ -83,10 +84,13 @@ if __name__ == "__main__":
     for row in tqdm(grid, desc="Rows"):
         for particle in tqdm(row, desc="Particles", leave=False):
             # draw a curve at each position of the particle.
+            hue = (particle.x + particle.y) / 2
+            r, g, b = colorsys.hsv_to_rgb(hue, 1, 1)
+            color = Vec3D(r, g, b)
             draw_curve(
                 particle.pos(),
                 200,
-                color=Vec3D(particle.y, particle.x, particle.x),
+                color=color,
                 width=0.001,
                 # step_size=0.001,
             )

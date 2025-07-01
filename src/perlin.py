@@ -2,15 +2,7 @@ import json
 import math
 import random
 
-
-def fade(t: float) -> float:
-    """Fade function: 6t^5 - 15t^4 + 10t^3"""
-    return t * t * t * (t * (t * 6 - 15) + 10)
-
-
-def lerp(t: float, a: float, b: float) -> float:
-    """Linear interpolation between a and b with t."""
-    return a + t * (b - a)
+from math_utils import fade, lerp
 
 
 def shuffle(arr: list[int]) -> None:
@@ -31,7 +23,6 @@ class Perlin2D:
     def noise(self, x: float, y: float) -> float:
         """
         Perlin noise implementation based on Ken Perlin's 2002 paper.
-        Note that x and y expected to be normalized from 0.0 to 1.0.
         """
         xi = math.floor(x) & 255
         yi = math.floor(y) & 255
@@ -69,7 +60,7 @@ class Perlin2D:
         y: int,
         numOctaves: int,
         amplitude: float = 1.0,
-        frequency: float = 0.03,
+        frequency: float = 0.01,
     ) -> float:
         """Fractal Brownian Motion for better noise results."""
         result = 0.0

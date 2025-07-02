@@ -1,5 +1,5 @@
 # Flow Fields
 
-Simple flow field with perlin noise using pycairo
+Simple flow field with Perlin noise (fractal brownian motion) using `pycairo`
 
 ![Flow field generated with current code](flow.png)

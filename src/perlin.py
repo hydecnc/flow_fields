@@ -60,7 +60,7 @@ class Perlin2D:
         y: int,
         numOctaves: int,
         amplitude: float = 1.0,
-        frequency: float = 0.01,
+        frequency: float = 0.005,
     ) -> float:
         """Fractal Brownian Motion for better noise results."""
         result = 0.0

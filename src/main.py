@@ -10,7 +10,8 @@ from particle import Particle
 from perlin import Perlin2D
 from vector import Vec2D, Vec3D
 
-if __name__ == "__main__":
+
+def main() -> None:
     # Initial setup
     surface = cairo.ImageSurface(
         cairo.FORMAT_ARGB32, configuration.SCALED_WIDTH, configuration.SCALED_HEIGHT
@@ -79,3 +80,7 @@ if __name__ == "__main__":
     final_ctx.paint()
 
     final_surface.write_to_png("flow.png")
+
+
+if __name__ == "__main__":
+    main()

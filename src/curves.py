@@ -8,6 +8,31 @@ from particle import Particle
 from vector import Vec2D, Vec3D
 
 
+def interpolated_angle(
+    grid: list[list[Particle]],
+    pos: Vec2D,
+) -> float:
+    gx, gy = pos.x * configuration.NUM_COLS, pos.y * configuration.NUM_ROWS
+    x0 = int(gx)
+    x1 = min(int(gx) + 1, configuration.NUM_COLS - 1)
+    y1 = int(gy)
+    y0 = min(int(gy) + 1, configuration.NUM_ROWS - 1)
+
+    # angles at the four closest grid points
+    angle_00 = grid[y0][x0].angle
+    angle_01 = grid[y1][x0].angle
+    angle_10 = grid[y0][x1].angle
+    angle_11 = grid[y1][x1].angle
+
+    # distance between the current position and the closest grid points
+    dx = gx - x0
+    dy = gy - y0
+
+    angle_bottom = angle_lerp(dx, angle_00, angle_10)
+    angle_top = angle_lerp(dx, angle_01, angle_11)
+    return angle_lerp(dy, angle_bottom, angle_top)
+
+
 def draw_curve(
     ctx: cairo.Context[cairo.ImageSurface],
     grid: list[list[Particle]],
@@ -25,25 +50,7 @@ def draw_curve(
     ctx.move_to(curve.x, curve.y)
 
     for _ in range(num_steps):
-        gx, gy = curve.x * configuration.NUM_COLS, curve.y * configuration.NUM_ROWS
-        x0 = int(gx)
-        x1 = min(int(gx) + 1, configuration.NUM_COLS - 1)
-        y1 = int(gy)
-        y0 = min(int(gy) + 1, configuration.NUM_ROWS - 1)
-
-        # angles at the four closest grid points
-        angle_00 = grid[y0][x0].angle
-        angle_01 = grid[y1][x0].angle
-        angle_10 = grid[y0][x1].angle
-        angle_11 = grid[y1][x1].angle
-
-        # distance between the current position and the closest grid points
-        dx = gx - x0
-        dy = gy - y0
-
-        angle_bottom = angle_lerp(dx, angle_00, angle_10)
-        angle_top = angle_lerp(dx, angle_01, angle_11)
-        grid_angle = angle_lerp(dy, angle_bottom, angle_top)
+        grid_angle = interpolated_angle(grid, curve)
 
         # NOTE: Try out Runge Kutta approximation
 

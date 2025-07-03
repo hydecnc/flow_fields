@@ -3,18 +3,18 @@ import math
 import cairo
 
 import configuration
-from curves import draw_curves  # pyright: ignore[reportUnknownVariableType]
+from lines.draw import draw_lines  # pyright: ignore[reportUnknownVariableType]
 from math_utils import lerp
 from particle import Particle
 from perlin import Perlin2D
-from vector import Vec2D
+from vector import Vec2
 
 
 def setup_grid(perlin2d: Perlin2D) -> list[list[Particle]]:
     grid: list[list[Particle]] = []
     row_step = 1 / configuration.NUM_ROWS
     col_step = 1 / configuration.NUM_COLS
-    pos = Vec2D(0, 0)
+    pos = Vec2(0, 0)
     for row in range(configuration.NUM_ROWS + 1):
         grid_row: list[Particle] = []
         for col in range(configuration.NUM_COLS + 1):
@@ -51,12 +51,12 @@ def main() -> None:
     ctx.fill()
 
     # Setup noise
-    perlin2d = Perlin2D(shuffle_p=False)
+    perlin2d = Perlin2D(shuffle_p=True)
 
     # Add particles to grid
     grid = setup_grid(perlin2d)
 
-    draw_curves(ctx, grid)
+    draw_lines(ctx, grid)
 
     final_surface = cairo.ImageSurface(
         cairo.FORMAT_ARGB32, configuration.WIDTH, configuration.HEIGHT

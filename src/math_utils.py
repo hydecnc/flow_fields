@@ -1,5 +1,7 @@
 import math
 
+from vector import Vec2
+
 
 def fade(t: float) -> float:
     """Fade function: 6t^5 - 15t^4 + 10t^3"""
@@ -28,3 +30,7 @@ def cosine_lerp(t: float, a: float, b: float) -> float:
     """Cosine interpolation between a and b with t."""
     mu = (1 - math.cos(t * math.pi)) / 2
     return a * (1 - mu) + b * mu
+
+
+def angle_to_vector(angle: float) -> Vec2:
+    return Vec2(math.cos(angle), math.sin(angle))

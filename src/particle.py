@@ -1,4 +1,4 @@
-from vector import Vec2D
+from vector import Vec2
 
 
 class Particle:
@@ -7,5 +7,5 @@ class Particle:
         self.y: float = y
         self.angle: float = angle
 
-    def pos(self) -> Vec2D:
-        return Vec2D(self.x, self.y)
+    def pos(self) -> Vec2:
+        return Vec2(self.x, self.y)

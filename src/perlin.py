@@ -2,6 +2,7 @@ import json
 import math
 import random
 
+import configuration
 from math_utils import fade, lerp
 
 
@@ -60,7 +61,7 @@ class Perlin2D:
         y: int,
         numOctaves: int,
         amplitude: float = 1.0,
-        frequency: float = 0.005,
+        frequency: float = configuration.FREQUENCY,
     ) -> float:
         """Fractal Brownian Motion for better noise results."""
         result = 0.0

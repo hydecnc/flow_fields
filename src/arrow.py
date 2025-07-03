@@ -2,27 +2,27 @@ import math
 
 import cairo
 
-from vector import Vec2D, Vec3D
+from vector import Vec2, Vec3
 
 
 class Arrow:
     def __init__(
         self,
-        start: Vec2D,
-        end: Vec2D,
+        start: Vec2,
+        end: Vec2,
         tip_size: float,
         angle: float = math.pi / 4,
         thickness: float = 0.001,
-        color: Vec3D | None = None,
+        color: Vec3 | None = None,
     ) -> None:
         if color is None:
-            color = Vec3D(0, 0, 0)
-        self.start: Vec2D = start
-        self.end: Vec2D = end
+            color = Vec3(0, 0, 0)
+        self.start: Vec2 = start
+        self.end: Vec2 = end
         self.tip_size: float = tip_size
         self.angle: float = angle / 2
         self.thickness: float = thickness
-        self.color: Vec3D = color
+        self.color: Vec3 = color
 
     def draw(self, ctx: cairo.Context) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         # set color and arrow width
@@ -37,11 +37,11 @@ class Arrow:
         normal_disp = disp / disp.norm()
 
         # rotate the displacement vector by self.angle
-        rot1 = Vec2D(
+        rot1 = Vec2(
             math.cos(self.angle) * normal_disp.x - math.sin(self.angle) * normal_disp.x,
             math.sin(self.angle) * normal_disp.y + math.cos(self.angle) * normal_disp.y,
         )
-        rot2 = Vec2D(
+        rot2 = Vec2(
             math.cos(-self.angle) * normal_disp.x
             - math.sin(-self.angle) * normal_disp.x,
             math.sin(-self.angle) * normal_disp.y

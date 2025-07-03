@@ -1,6 +1,7 @@
 import math
 
-import cairo
+from cairo import Context
+from tqdm import tqdm
 
 import configuration
 from math_utils import angle_lerp
@@ -34,7 +35,7 @@ def interpolated_angle(
 
 
 def draw_curve(
-    ctx: cairo.Context[cairo.ImageSurface],
+    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
     grid: list[list[Particle]],
     start_point: Vec2D,
     num_steps: int,
@@ -66,3 +67,25 @@ def draw_curve(
 
         ctx.line_to(curve.x, curve.y)
     ctx.stroke()
+
+
+def draw_curves(
+    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    grid: list[list[Particle]],
+) -> None:
+    ctx.set_source_rgb(0, 0, 0)
+    for row in tqdm(grid, desc="Rows"):
+        for particle in tqdm(row, desc="Particles", leave=False):
+            # draw a curve at each position of the particle.
+            # TODO: Add prettier coloring
+            color = Vec3D(1, 1, 1)
+            # PERF: Add multiprocessing for faster render times
+            draw_curve(
+                ctx,
+                grid,
+                particle.pos(),
+                200,
+                color=color,
+                width=0.0005,
+                step_size=0.001,
+            )

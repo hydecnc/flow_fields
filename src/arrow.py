@@ -24,7 +24,7 @@ class Arrow:
         self.thickness: float = thickness
         self.color: Vec3D = color
 
-    def draw(self, ctx: cairo.Context[cairo.ImageSurface]) -> None:
+    def draw(self, ctx: cairo.Context) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         # set color and arrow width
         ctx.set_source_rgb(self.color.x, self.color.y, self.color.z)
         ctx.set_line_width(self.thickness)

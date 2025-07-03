@@ -79,7 +79,7 @@ def main() -> None:
     final_ctx.set_source_surface(surface)
     final_ctx.paint()
 
-    final_surface.write_to_png("flow.png")
+    final_surface.write_to_png("current.png")
 
 
 if __name__ == "__main__":

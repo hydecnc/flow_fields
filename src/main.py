@@ -3,7 +3,7 @@ import math
 import cairo
 
 import configuration
-from lines.draw import draw_lines  # pyright: ignore[reportUnknownVariableType]
+from lines.draw import draw_flow_field  # pyright: ignore[reportUnknownVariableType]
 from math_utils import lerp
 from particle import Particle
 from perlin import Perlin2D
@@ -56,7 +56,7 @@ def main() -> None:
     # Add particles to grid
     grid = setup_grid(perlin2d)
 
-    draw_lines(ctx, grid)
+    draw_flow_field(ctx, grid, start_method="sparse")
 
     final_surface = cairo.ImageSurface(
         cairo.FORMAT_ARGB32, configuration.WIDTH, configuration.HEIGHT

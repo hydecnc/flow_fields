@@ -4,7 +4,7 @@ import random
 import configuration
 from math_utils import angle_to_vector, lerp
 from particle import Particle
-from vector import Vec2
+from vector import Vec2, Vec3
 
 
 def interpolated_angle(
@@ -49,5 +49,5 @@ def interpolated_angle(
     return math.atan2(final_vec.y, final_vec.x)
 
 
-def random_color() -> tuple[float, float, float]:
-    return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
+def random_color() -> Vec3:
+    return Vec3(random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))

@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 import configuration
 from grid import SpatialGrid
-from lines.utils import interpolated_angle
+from lines.utils import interpolated_angle, random_color
 from particle import Particle
 from vector import Vec2, Vec3
 
@@ -19,6 +19,17 @@ def draw_line(
     spatial_grid: SpatialGrid | None = None,
     color: Vec3 | None = None,
 ) -> None:
+    """
+    Draw a line starting at start_point given the number of steps and other information.
+
+    Args:
+        ctx (Context): The pycairo context to draw to.
+        grid (list[list[Particle]]): Grid containing the generated angles to be used for the lines.
+        start_point (Vec2): Vec2 in [0, 1] x [0, 1] where the line starts.
+        num_steps (int): The number of steps (approximation) that will be used to draw the line.
+        spatial_grid (SpatialGrid | None): Spatial Grid designed to calculate collision. If None, then no collision is calculated.
+        color (Vec3 | None): Color of the line. If None, color from the configuration is used.
+    """
     if color is None:
         color = configuration.line.color
     check_collision = spatial_grid is not None
@@ -59,17 +70,70 @@ def draw_line(
     ctx.stroke()
 
 
-def draw_lines(
+def draw_flow_field(
     ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
     grid: list[list[Particle]],
     check_collision: bool = True,
+    start_method: str | None = None,
 ) -> None:
     ctx.set_source_rgb(0, 0, 0)
+
+    # TODO: Start drawing lines in more varying positions
+    match start_method:
+        case "sparse":
+            draw_sparse_flow_field(ctx, grid, check_collision)
+        case "full":
+            draw_full_flow_field(ctx, grid, check_collision)
+        case _:
+            pass
+
+
+def draw_sparse_flow_field(
+    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    grid: list[list[Particle]],
+    check_collision: bool,
+) -> None:
     # Make spatial grid partition for collision detection
     if check_collision:
         spatial_grid = SpatialGrid()
     else:
         spatial_grid = None
+
+    pos = Vec2(0, 0)
+    x_step = 1 / configuration.NUM_LINES_X
+    y_step = 1 / configuration.NUM_LINES_Y
+    # for _ in tqdm(range(configuration.NUM_LINES_Y), desc="Rows"):
+    for _ in range(configuration.NUM_LINES_Y):
+        pos.x = 0
+        # for _ in tqdm(range(configuration.NUM_LINES_X), desc="Particles", leave=False):
+        for _ in range(configuration.NUM_LINES_X):
+            # color = configuration.line.color
+            # print(f"Drawing line from: {pos}")
+            # PERF: Add multiprocessing for faster render times
+            draw_line(
+                ctx,
+                grid,
+                pos,
+                200,
+                spatial_grid=spatial_grid,
+                # color=color,
+                color=random_color(),
+            )
+            pos.x += x_step
+        pos.y += y_step
+
+
+def draw_full_flow_field(
+    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    grid: list[list[Particle]],
+    check_collision: bool,
+) -> None:
+    # Make spatial grid partition for collision detection
+    if check_collision:
+        spatial_grid = SpatialGrid()
+    else:
+        spatial_grid = None
+
     for row in tqdm(grid, desc="Rows"):
         for particle in tqdm(row, desc="Particles", leave=False):
             # draw a curve at each position of the particle.

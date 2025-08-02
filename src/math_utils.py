@@ -34,3 +34,7 @@ def cosine_lerp(t: float, a: float, b: float) -> float:
 
 def angle_to_vector(angle: float) -> Vec2:
     return Vec2(math.cos(angle), math.sin(angle))
+
+
+def ease_out_quint(t: float) -> float:
+    return 1 - math.pow(1 - t, 5)

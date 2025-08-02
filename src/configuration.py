@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import final
 
+from colors import HSVGradient, SolidColor
 from vector import Vec3
 
 # NOTE: consider switching to a TOML config
@@ -21,8 +22,8 @@ NUM_SPARSE_LINES_Y = 10
 @final
 @dataclass
 class Line:
-    width: float = 0.005
-    color: Vec3 = Vec3(0.3, 0.1, 0.7)
+    width: float = 0.003
+    color: HSVGradient = HSVGradient(0.0, 0.7, 1.0)
     step_size: float = 0.003
 
 

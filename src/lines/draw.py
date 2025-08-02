@@ -1,4 +1,3 @@
-import colorsys
 import math
 
 from cairo import Context
@@ -8,7 +7,7 @@ import configuration
 from grid import SpatialGrid
 from lines.utils import interpolated_angle
 from particle import Particle
-from vector import Vec2, Vec3
+from vector import Vec2
 
 
 def draw_line(
@@ -17,7 +16,6 @@ def draw_line(
     start_point: Vec2,
     num_steps: int,
     spatial_grid: SpatialGrid | None = None,
-    color: Vec3 | None = None,
 ) -> None:
     """
     Draw a line starting at start_point given the number of steps and other information.
@@ -28,27 +26,16 @@ def draw_line(
         start_point (Vec2): Vec2 in [0, 1] x [0, 1] where the line starts.
         num_steps (int): The number of steps (approximation) that will be used to draw the line.
         spatial_grid (SpatialGrid | None): Spatial Grid designed to calculate collision. If None, then no collision is calculated.
-        color (Vec3 | None): Color of the line. If None, color from the configuration is used.
     """
-    if color is None:
-        color = configuration.line.color
     check_collision = spatial_grid is not None
     pos = start_point
-
-    cur_color = color
-    hsv = colorsys.rgb_to_hsv(color.r, color.g, color.b)
 
     ctx.set_line_width(configuration.line.width)
     ctx.move_to(pos.x, pos.y)
 
     for step in range(num_steps):
         # Set line color
-        cur_color = colorsys.hsv_to_rgb(
-            (hsv[0] + 0.2 * (step / num_steps)) % 1.0,
-            hsv[1],
-            step / (num_steps - 1),
-        )
-        ctx.set_source_rgb(*cur_color)
+        ctx.set_source_rgb(*configuration.line.color.get(step / (num_steps - 1)))
 
         grid_angle = interpolated_angle(grid, pos)
 
@@ -67,6 +54,7 @@ def draw_line(
             collision = spatial_grid.check_collision(pos)
             if collision:
                 break
+                # pass
             # record the current position every 10th step
             if step % 20 == 0:
                 spatial_grid.add_position(pos)
@@ -115,7 +103,6 @@ def draw_sparse_flow_field(
         for _ in tqdm(
             range(configuration.NUM_SPARSE_LINES_X), desc="Particles", leave=False
         ):
-            # color = configuration.line.color
             # PERF: Add multiprocessing for faster render times
             draw_line(
                 ctx,
@@ -123,8 +110,6 @@ def draw_sparse_flow_field(
                 pos,
                 200,
                 spatial_grid=spatial_grid,
-                # color=color,
-                color=configuration.line.color,
             )
             pos.x += x_step
         pos.y += y_step
@@ -143,8 +128,6 @@ def draw_full_flow_field(
 
     for row in tqdm(grid, desc="Rows"):
         for particle in tqdm(row, desc="Particles", leave=False):
-            # draw a curve at each position of the particle.
-            # TODO: Add prettier coloring
             # PERF: Add multiprocessing for faster render times
             draw_line(
                 ctx,
@@ -152,5 +135,4 @@ def draw_full_flow_field(
                 particle.pos(),
                 200,
                 spatial_grid=spatial_grid,
-                color=configuration.line.color,
             )

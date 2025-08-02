@@ -47,7 +47,3 @@ def interpolated_angle(
         lerp(dy, vec_top.y, vec_bottom.y),
     )
     return math.atan2(final_vec.y, final_vec.x)
-
-
-def random_color() -> Vec3:
-    return Vec3(random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))

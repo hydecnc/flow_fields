@@ -22,7 +22,7 @@ NUM_SPARSE_LINES_Y = 10
 @dataclass
 class Line:
     width: float = 0.005
-    color: Vec3 = Vec3(1.0, 1.0, 1.0)
+    color: Vec3 = Vec3(0.3, 0.1, 0.7)
     step_size: float = 0.003
 
 

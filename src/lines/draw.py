@@ -1,12 +1,12 @@
+import colorsys
 import math
-import random
 
 from cairo import Context
 from tqdm import tqdm
 
 import configuration
 from grid import SpatialGrid
-from lines.utils import interpolated_angle, random_color
+from lines.utils import interpolated_angle
 from particle import Particle
 from vector import Vec2, Vec3
 
@@ -35,16 +35,21 @@ def draw_line(
     check_collision = spatial_grid is not None
     pos = start_point
 
-    # Set line color
-    ctx.set_source_rgb(
-        color.r,
-        color.g,
-        color.b,
-    )
+    cur_color = color
+    hsv = colorsys.rgb_to_hsv(color.r, color.g, color.b)
+
     ctx.set_line_width(configuration.line.width)
     ctx.move_to(pos.x, pos.y)
 
     for step in range(num_steps):
+        # Set line color
+        cur_color = colorsys.hsv_to_rgb(
+            (hsv[0] + 0.2 * (step / num_steps)) % 1.0,
+            hsv[1],
+            step / (num_steps - 1),
+        )
+        ctx.set_source_rgb(*cur_color)
+
         grid_angle = interpolated_angle(grid, pos)
 
         # NOTE: Try out Runge Kutta approximation
@@ -67,6 +72,9 @@ def draw_line(
                 spatial_grid.add_position(pos)
 
         ctx.line_to(pos.x, pos.y)
+        ctx.stroke()
+        ctx.move_to(pos.x, pos.y)
+
     ctx.stroke()
 
 
@@ -102,11 +110,11 @@ def draw_sparse_flow_field(
     pos = Vec2(0, 0)
     x_step = 1 / configuration.NUM_SPARSE_LINES_X
     y_step = 1 / configuration.NUM_SPARSE_LINES_Y
-    # for _ in tqdm(range(configuration.NUM_LINES_Y), desc="Rows"):
-    for _ in range(configuration.NUM_SPARSE_LINES_Y):
+    for _ in tqdm(range(configuration.NUM_SPARSE_LINES_Y), desc="Rows"):
         pos.x = 0
-        # for _ in tqdm(range(configuration.NUM_LINES_X), desc="Particles", leave=False):
-        for _ in range(configuration.NUM_SPARSE_LINES_X):
+        for _ in tqdm(
+            range(configuration.NUM_SPARSE_LINES_X), desc="Particles", leave=False
+        ):
             # color = configuration.line.color
             # PERF: Add multiprocessing for faster render times
             draw_line(
@@ -116,7 +124,7 @@ def draw_sparse_flow_field(
                 200,
                 spatial_grid=spatial_grid,
                 # color=color,
-                color=random_color(),
+                color=configuration.line.color,
             )
             pos.x += x_step
         pos.y += y_step
@@ -137,7 +145,6 @@ def draw_full_flow_field(
         for particle in tqdm(row, desc="Particles", leave=False):
             # draw a curve at each position of the particle.
             # TODO: Add prettier coloring
-            color = configuration.line.color
             # PERF: Add multiprocessing for faster render times
             draw_line(
                 ctx,
@@ -145,5 +152,5 @@ def draw_full_flow_field(
                 particle.pos(),
                 200,
                 spatial_grid=spatial_grid,
-                color=color,
+                color=configuration.line.color,
             )

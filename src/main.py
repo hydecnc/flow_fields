@@ -58,6 +58,7 @@ def main() -> None:
 
     draw_flow_field(ctx, grid, start_method="sparse")
 
+    # Supersampling; scale down the image.
     final_surface = cairo.ImageSurface(
         cairo.FORMAT_ARGB32, configuration.WIDTH, configuration.HEIGHT
     )
@@ -69,6 +70,8 @@ def main() -> None:
     final_ctx.paint()
 
     final_surface.write_to_png("flow-field.png")
+
+    # TODO: Post processing effects
 
 
 if __name__ == "__main__":

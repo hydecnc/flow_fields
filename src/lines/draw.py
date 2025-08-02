@@ -100,15 +100,14 @@ def draw_sparse_flow_field(
         spatial_grid = None
 
     pos = Vec2(0, 0)
-    x_step = 1 / configuration.NUM_LINES_X
-    y_step = 1 / configuration.NUM_LINES_Y
+    x_step = 1 / configuration.NUM_SPARSE_LINES_X
+    y_step = 1 / configuration.NUM_SPARSE_LINES_Y
     # for _ in tqdm(range(configuration.NUM_LINES_Y), desc="Rows"):
-    for _ in range(configuration.NUM_LINES_Y):
+    for _ in range(configuration.NUM_SPARSE_LINES_Y):
         pos.x = 0
         # for _ in tqdm(range(configuration.NUM_LINES_X), desc="Particles", leave=False):
-        for _ in range(configuration.NUM_LINES_X):
+        for _ in range(configuration.NUM_SPARSE_LINES_X):
             # color = configuration.line.color
-            # print(f"Drawing line from: {pos}")
             # PERF: Add multiprocessing for faster render times
             draw_line(
                 ctx,

@@ -7,6 +7,7 @@ from lines.draw import draw_flow_field  # pyright: ignore[reportUnknownVariableT
 from math_utils import lerp
 from particle import Particle
 from perlin import Perlin2D
+from simplex import OpenSimplex2D
 from vector import Vec2
 
 
@@ -19,7 +20,8 @@ def setup_grid(perlin2d: Perlin2D) -> list[list[Particle]]:
         grid_row: list[Particle] = []
         for col in range(configuration.NUM_COLS + 1):
             angle = lerp(
-                perlin2d.fractal_brownian_motion(row, col, configuration.NUM_OCTAVES),
+                (OpenSimplex2D.noise(configuration.SEED, row * 0.01, col * 0.01) + 1)
+                / 2,
                 0,
                 2 * math.pi,
             )
@@ -56,7 +58,7 @@ def main() -> None:
     # Add particles to grid
     grid = setup_grid(perlin2d)
 
-    draw_flow_field(ctx, grid, start_method="sparse")
+    draw_flow_field(ctx, grid, start_method="sparse", check_collision=False)
 
     # Supersampling; scale down the image.
     final_surface = cairo.ImageSurface(

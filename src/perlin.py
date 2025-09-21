@@ -13,6 +13,7 @@ def shuffle(arr: list[int]) -> None:
         arr[index], arr[e] = arr[e], arr[index]
 
 
+# TODO: Consider swapping to classmethods
 class Perlin2D:
     def __init__(self, shuffle_p: bool = True) -> None:
         with open("src/permutation_table.json", "r") as file:
@@ -57,20 +58,21 @@ class Perlin2D:
 
     def fractal_brownian_motion(
         self,
-        x: int,
-        y: int,
+        x: float,
+        y: float,
         numOctaves: int,
         amplitude: float = 1.0,
         frequency: float = configuration.FREQUENCY,
     ) -> float:
         """Fractal Brownian Motion for better noise results."""
         result = 0.0
+        max_value = 0.0
 
         for _ in range(numOctaves):
-            n = amplitude * self.noise(x * frequency, y * frequency)
-            result += n
+            result += amplitude * self.noise(x * frequency, y * frequency)
+            max_value += amplitude
 
             amplitude *= 0.5
             frequency *= 2.0
 
-        return result
+        return result / max_value

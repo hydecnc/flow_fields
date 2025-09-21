@@ -53,9 +53,7 @@ def random_color() -> Vec3:
 
 def hsv_colors(color: Vec3, t: float) -> tuple[float, float, float]:
     hsv = colorsys.rgb_to_hsv(color.r, color.g, color.b)
-    # print(t)
     v = 1 - abs(1 - 2 * t)
-    # print(v)
     return colorsys.hsv_to_rgb(
         (hsv[0] + 0.2 * t) % 1.0,
         hsv[1],

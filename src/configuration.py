@@ -5,7 +5,6 @@ from typing import final
 from colors import Color, HSVGradient, SolidColor
 from vector import Vec3
 
-# NOTE: consider switching to a TOML config
 WIDTH, HEIGHT = 1000, 1000
 SUPERSAMPLE = 1
 SCALED_WIDTH, SCALED_HEIGHT = WIDTH * SUPERSAMPLE, HEIGHT * SUPERSAMPLE
@@ -19,6 +18,8 @@ NUM_PARTITION_COL = 100
 NUM_SPARSE_LINES_X = 20
 NUM_SPARSE_LINES_Y = 20
 SOLID_COLOR: int = -1
+
+SEED: int = 1847362951
 
 
 @final

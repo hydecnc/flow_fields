@@ -62,19 +62,17 @@ class Perlin2D:
         cls,
         x: float,
         y: float,
-        numOctaves: int,
-        amplitude: float = 1.0,
-        frequency: float = configuration.FREQUENCY,
+        numOctaves: int = configuration.FBM_NUM_OCTAVES,
+        amplitude: float = configuration.FBM_AMPLITUDE,
+        frequency: float = configuration.FBM_FREQUENCY,
     ) -> float:
         """Fractal Brownian Motion for better noise results."""
         result = 0.0
-        max_value = 0.0
 
         for _ in range(numOctaves):
             result += amplitude * cls.noise(x * frequency, y * frequency)
-            max_value += amplitude
 
             amplitude *= 0.5
             frequency *= 2.0
 
-        return result / max_value
+        return result

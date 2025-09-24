@@ -26,7 +26,7 @@ class Arrow:
 
     def draw(self, ctx: cairo.Context) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         # set color and arrow width
-        ctx.set_source_rgb(*self.color.get(configuration.SOLID_COLOR))
+        ctx.set_source_rgb(*self.color.get())
         ctx.set_line_width(self.thickness)
 
         ctx.move_to(self.start.x, self.start.y)

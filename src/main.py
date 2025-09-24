@@ -22,9 +22,11 @@ def setup_grid() -> list[list[Particle]]:
     for row in range(configuration.NUM_ROWS + 1):
         grid_row: list[Particle] = []
         for col in range(configuration.NUM_COLS + 1):
+            # noise = Perlin2D.fractal_brownian_motion(row, col, amplitude=50.0)
+            noise = OpenSimplex2D.noise(configuration.SEED, row * 0.01, col * 0.01)
+            noise = (noise + 1) / 2
             angle = lerp(
-                (OpenSimplex2D.noise(configuration.SEED, row * 0.01, col * 0.01) + 1)
-                / 2,
+                noise,
                 0,
                 2 * math.pi,
             )
@@ -61,7 +63,7 @@ def main() -> None:
     # Add particles to grid
     grid = setup_grid()
 
-    draw_flow_field(ctx, grid, start_method="sparse", check_collision=False)
+    draw_flow_field(ctx, grid, start_method="sparse", check_collision=True)
 
     # Supersampling; scale down the image.
     final_surface = cairo.ImageSurface(

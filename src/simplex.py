@@ -27,6 +27,7 @@ class OpenSimplex2D:
     def noise(cls, seed: int, x: float, y: float) -> float:
         """
         OpenSimplex2 2D Noise based on Kurt Spencer's implementation in Java.
+        Return a value from -1.0 to 1.0.
         """
         s = SKEW_2D * (x + y)
         xs = x + s

@@ -35,7 +35,7 @@ def draw_line(
 
     for step in range(num_steps):
         # Set line color
-        ctx.set_source_rgb(*configuration.line.color.get(step / (num_steps - 1)))
+        ctx.set_source_rgb(*configuration.line.color.get(step / (num_steps - 1) * 4))
 
         grid_angle = interpolated_angle(grid, pos)
 

@@ -12,7 +12,7 @@ class Color(ABC):
     g: float
 
     @abstractmethod
-    def get(self, t: float) -> tuple[float, float, float]:
+    def get(self, t: float = -1) -> tuple[float, float, float]:
         pass
 
 
@@ -23,7 +23,7 @@ class SolidColor(Color):
         self.g: float = g
 
     @override
-    def get(self, t: float) -> tuple[float, float, float]:
+    def get(self, t: float = -1) -> tuple[float, float, float]:
         return self.r, self.b, self.g
 
 
@@ -38,7 +38,9 @@ class HSVGradient(Color):
         # self.v: float = v
 
     @override
-    def get(self, t: float) -> tuple[float, float, float]:
+    def get(self, t: float = -1) -> tuple[float, float, float]:
+        if t == -1:
+            raise ValueError("t must be between 0 and 1")
         hsv = colorsys.rgb_to_hsv(self.r, self.g, self.b)
         return colorsys.hsv_to_rgb(
             (hsv[0] + 0.5 * t) % 1.0,

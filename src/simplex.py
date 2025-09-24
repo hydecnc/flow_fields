@@ -36,6 +36,9 @@ class OpenSimplex2D:
 
     @classmethod
     def _noise_unskewed_base(cls, seed: int, xs: float, ys: float) -> float:
+        """
+        Return OpenSimplex2 noise of provided seed, given xs and ys in Cartesian coordinates.
+        """
         # Get base points and offsets
         xsb = math.floor(xs)
         ysb = math.floor(ys)

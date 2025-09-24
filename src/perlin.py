@@ -13,16 +13,16 @@ def shuffle(arr: list[int]) -> None:
         arr[index], arr[e] = arr[e], arr[index]
 
 
-# TODO: Consider swapping to classmethods
 class Perlin2D:
-    def __init__(self, shuffle_p: bool = True) -> None:
+    @classmethod
+    def shuffle_p(cls) -> None:
         with open("src/permutation_table.json", "r") as file:
-            self.perm: list[int] = json.load(file)
-            if shuffle_p:
-                shuffle(self.perm)
-            self.perm = self.perm + self.perm
+            cls.perm: list[int] = json.load(file)
+            shuffle(cls.perm)
+            cls.perm = cls.perm + cls.perm
 
-    def noise(self, x: float, y: float) -> float:
+    @classmethod
+    def noise(cls, x: float, y: float) -> float:
         """
         Perlin noise implementation based on Ken Perlin's 2002 paper.
         """
@@ -33,18 +33,19 @@ class Perlin2D:
 
         u, v = fade(xf), fade(yf)
 
-        aa = self.perm[self.perm[xi] + yi]  # bottom left
-        ab = self.perm[self.perm[xi] + yi + 1]  # top left
-        ba = self.perm[self.perm[xi + 1] + yi]  # bottom right
-        bb = self.perm[self.perm[xi + 1] + yi + 1]  # top right
+        aa = cls.perm[cls.perm[xi] + yi]  # bottom left
+        ab = cls.perm[cls.perm[xi] + yi + 1]  # top left
+        ba = cls.perm[cls.perm[xi + 1] + yi]  # bottom right
+        bb = cls.perm[cls.perm[xi + 1] + yi + 1]  # top right
 
         return lerp(
             v,
-            lerp(u, self.grad(aa, xf, yf), self.grad(ba, xf - 1, yf)),
-            lerp(u, self.grad(ab, xf, yf - 1), self.grad(bb, xf - 1, yf - 1)),
+            lerp(u, cls.grad(aa, xf, yf), cls.grad(ba, xf - 1, yf)),
+            lerp(u, cls.grad(ab, xf, yf - 1), cls.grad(bb, xf - 1, yf - 1)),
         )
 
-    def grad(self, hash: int, x: float, y: float) -> float:
+    @classmethod
+    def grad(cls, hash: int, x: float, y: float) -> float:
         """Return the dot product of each corner of the cell."""
         h = hash & 3
         if h == 0:
@@ -56,8 +57,9 @@ class Perlin2D:
         else:
             return -y  # gradient (0, -1)
 
+    @classmethod
     def fractal_brownian_motion(
-        self,
+        cls,
         x: float,
         y: float,
         numOctaves: int,
@@ -69,7 +71,7 @@ class Perlin2D:
         max_value = 0.0
 
         for _ in range(numOctaves):
-            result += amplitude * self.noise(x * frequency, y * frequency)
+            result += amplitude * cls.noise(x * frequency, y * frequency)
             max_value += amplitude
 
             amplitude *= 0.5

@@ -11,7 +11,10 @@ from simplex import OpenSimplex2D
 from vector import Vec2
 
 
-def setup_grid(perlin2d: Perlin2D) -> list[list[Particle]]:
+def setup_grid() -> list[list[Particle]]:
+    """
+    Return a 2D array of Particle placed in a grid with angle produced with a noise function.
+    """
     grid: list[list[Particle]] = []
     row_step = 1 / configuration.NUM_ROWS
     col_step = 1 / configuration.NUM_COLS
@@ -53,10 +56,10 @@ def main() -> None:
     ctx.fill()
 
     # Setup noise
-    perlin2d = Perlin2D(shuffle_p=True)
+    Perlin2D.shuffle_p()
 
     # Add particles to grid
-    grid = setup_grid(perlin2d)
+    grid = setup_grid()
 
     draw_flow_field(ctx, grid, start_method="sparse", check_collision=False)
 

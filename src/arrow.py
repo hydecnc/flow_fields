@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import math
 
 import cairo
 
 import configuration
-from colors import Color
 from vector import Vec2
 
 
@@ -15,18 +16,18 @@ class Arrow:
         tip_size: float = configuration.arrow.tip_size,
         angle: float = configuration.arrow.angle,
         thickness: float = configuration.arrow.thickness,
-        color: Color = configuration.arrow.color,
+        color: cairo.Pattern = configuration.arrow.color,
     ) -> None:
         self.start: Vec2 = start
         self.end: Vec2 = end
         self.tip_size: float = tip_size
         self.angle: float = angle / 2
         self.thickness: float = thickness
-        self.color: Color = color
+        self.color: cairo.Pattern = color
 
-    def draw(self, ctx: cairo.Context) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    def draw(self, ctx: cairo.Context[cairo.ImageSurface]) -> None:
         # set color and arrow width
-        ctx.set_source_rgb(*self.color.get())
+        ctx.set_source(self.color)
         ctx.set_line_width(self.thickness)
 
         ctx.move_to(self.start.x, self.start.y)

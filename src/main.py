@@ -3,7 +3,7 @@ import math
 import cairo
 
 import configuration
-from lines.draw import draw_flow_field  # pyright: ignore[reportUnknownVariableType]
+from lines.draw import draw_flow_field
 from math_utils import lerp
 from particle import Particle
 from perlin import Perlin2D

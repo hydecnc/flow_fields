@@ -2,7 +2,8 @@ import math
 from dataclasses import dataclass
 from typing import final
 
-from colors import Color, HSVGradient, SolidColor
+import cairo
+
 from vector import Vec3
 
 # Image & grid configuration
@@ -33,14 +34,14 @@ class Arrow:
     tip_size: float = 0.1
     angle: float = math.pi / 4
     thickness: float = 0.001
-    color: Color = SolidColor(1.0, 1.0, 1.0)
+    color: cairo.SolidPattern = cairo.SolidPattern(1.0, 1.0, 1.0)
 
 
 @final
 @dataclass
 class Line:
     width: float = 0.002
-    color: Color = HSVGradient(0.0, 0.7, 1.0)
+    color: cairo.Pattern = cairo.SolidPattern(0.0, 0.7, 1.0)
     step_size: float = 0.003
 
 

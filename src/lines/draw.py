@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+import copy
 import math
 
-from cairo import Context
+from cairo import Context, ImageSurface, LinearGradient
 from tqdm import tqdm
 
 import configuration
@@ -10,13 +13,13 @@ from particle import Particle
 from vector import Vec2
 
 
-def draw_line(
-    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+def trace_line(
+    ctx: Context[ImageSurface],
     grid: list[list[Particle]],
     start_point: Vec2,
     num_steps: int,
     spatial_grid: SpatialGrid | None = None,
-) -> None:
+) -> Vec2:
     """
     Draw a line starting at start_point given the number of steps and other information.
 
@@ -28,15 +31,12 @@ def draw_line(
         spatial_grid (SpatialGrid | None): Spatial Grid designed to calculate collision. If None, then no collision is calculated.
     """
     check_collision = spatial_grid is not None
-    pos = start_point
+    pos = copy.copy(start_point)
 
     ctx.set_line_width(configuration.line.width)
     ctx.move_to(pos.x, pos.y)
 
     for step in range(num_steps):
-        # Set line color
-        ctx.set_source_rgb(*configuration.line.color.get(step / (num_steps - 1) * 4))
-
         grid_angle = interpolated_angle(grid, pos)
 
         # NOTE: Try out Runge Kutta approximation
@@ -60,20 +60,25 @@ def draw_line(
                 spatial_grid.add_position(pos)
 
         ctx.line_to(pos.x, pos.y)
-        ctx.stroke()
         ctx.move_to(pos.x, pos.y)
+    return pos
 
+
+def stroke_line(ctx: Context[ImageSurface], start_point: Vec2, end_point: Vec2) -> None:
+    # TODO: add swappable color support
+    color = LinearGradient(start_point.x, start_point.y, end_point.x, end_point.y)
+    color.add_color_stop_rgb(0, 1.0, 0.5, 0.5)
+    color.add_color_stop_rgba(1, 0.5, 1.0, 0.5, 0.2)
+    ctx.set_source(color)
     ctx.stroke()
 
 
 def draw_flow_field(
-    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    ctx: Context[ImageSurface],
     grid: list[list[Particle]],
     check_collision: bool = True,
     start_method: str | None = None,
 ) -> None:
-    ctx.set_source_rgb(0, 0, 0)
-
     # TODO: Start drawing lines in more varying positions
     match start_method:
         case "sparse":
@@ -85,7 +90,7 @@ def draw_flow_field(
 
 
 def draw_sparse_flow_field(
-    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    ctx: Context[ImageSurface],
     grid: list[list[Particle]],
     check_collision: bool,
 ) -> None:
@@ -104,19 +109,20 @@ def draw_sparse_flow_field(
             range(configuration.NUM_SPARSE_LINES_X), desc="Particles", leave=False
         ):
             # PERF: Add multiprocessing for faster render times
-            draw_line(
+            end_point = trace_line(
                 ctx,
                 grid,
                 pos,
                 200,
                 spatial_grid=spatial_grid,
             )
+            stroke_line(ctx, pos, end_point)
             pos.x += x_step
         pos.y += y_step
 
 
 def draw_full_flow_field(
-    ctx: Context,  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    ctx: Context[ImageSurface],
     grid: list[list[Particle]],
     check_collision: bool,
 ) -> None:
@@ -129,10 +135,11 @@ def draw_full_flow_field(
     for row in tqdm(grid, desc="Rows"):
         for particle in tqdm(row, desc="Particles", leave=False):
             # PERF: Add multiprocessing for faster render times
-            draw_line(
+            end_point = trace_line(
                 ctx,
                 grid,
                 particle.pos(),
                 200,
                 spatial_grid=spatial_grid,
             )
+            stroke_line(ctx, particle.pos(), end_point)

@@ -3,19 +3,20 @@ from __future__ import annotations
 import copy
 import math
 
+import numpy as np
+import numpy.typing as npt
 from cairo import Context, ImageSurface, LinearGradient
 from tqdm import tqdm
 
 import configuration
 from grid import SpatialGrid
 from lines.utils import interpolated_angle
-from particle import Particle
 from vector import Vec2
 
 
 def trace_line(
     ctx: Context[ImageSurface],
-    grid: list[list[Particle]],
+    angles: npt.NDArray[np.float64],
     start_point: Vec2,
     num_steps: int,
     spatial_grid: SpatialGrid | None = None,
@@ -25,7 +26,7 @@ def trace_line(
 
     Args:
         ctx (Context): The pycairo context to draw to.
-        grid (list[list[Particle]]): Grid containing the generated angles to be used for the lines.
+        grid (npt.NDArray[np.float64]): Grid containing the generated angles to be used for the lines.
         start_point (Vec2): Vec2 in [0, 1] x [0, 1] where the line starts.
         num_steps (int): The number of steps (approximation) that will be used to draw the line.
         spatial_grid (SpatialGrid | None): Spatial Grid designed to calculate collision. If None, then no collision is calculated.
@@ -37,12 +38,12 @@ def trace_line(
     ctx.move_to(pos.x, pos.y)
 
     for step in range(num_steps):
-        grid_angle = interpolated_angle(grid, pos)
+        angle = interpolated_angle(angles, pos)
 
         # NOTE: Try out Runge Kutta approximation
 
-        x_step = configuration.line.step_size * math.cos(grid_angle)
-        y_step = configuration.line.step_size * math.sin(grid_angle)
+        x_step = configuration.line.step_size * math.cos(angle)
+        y_step = configuration.line.step_size * math.sin(angle)
         pos += Vec2(x_step, y_step)
 
         # if the curve goes outside the line, stop
@@ -54,7 +55,7 @@ def trace_line(
             collision = spatial_grid.check_collision(pos)
             if collision:
                 break
-                # pass
+
             # record the current position every 10th step
             if step % 20 == 0:
                 spatial_grid.add_position(pos)
@@ -67,31 +68,32 @@ def trace_line(
 def stroke_line(ctx: Context[ImageSurface], start_point: Vec2, end_point: Vec2) -> None:
     # TODO: add swappable color support
     color = LinearGradient(start_point.x, start_point.y, end_point.x, end_point.y)
-    color.add_color_stop_rgb(0, 1.0, 0.5, 0.5)
-    color.add_color_stop_rgba(1, 0.5, 1.0, 0.5, 0.2)
+    color.add_color_stop_rgb(0, 42 / 255, 123 / 255, 155 / 255)
+    color.add_color_stop_rgb(0.5, 87 / 255, 199 / 255, 133 / 255)
+    color.add_color_stop_rgb(1, 237 / 255, 221 / 255, 83 / 255)
     ctx.set_source(color)
     ctx.stroke()
 
 
 def draw_flow_field(
     ctx: Context[ImageSurface],
-    grid: list[list[Particle]],
+    angles: npt.NDArray[np.float64],
     check_collision: bool = True,
     start_method: str | None = None,
 ) -> None:
     # TODO: Start drawing lines in more varying positions
     match start_method:
         case "sparse":
-            draw_sparse_flow_field(ctx, grid, check_collision)
+            draw_sparse_flow_field(ctx, angles, check_collision)
         case "full":
-            draw_full_flow_field(ctx, grid, check_collision)
+            draw_full_flow_field(ctx, angles, check_collision)
         case _:
             pass
 
 
 def draw_sparse_flow_field(
     ctx: Context[ImageSurface],
-    grid: list[list[Particle]],
+    angles: npt.NDArray[np.float64],
     check_collision: bool,
 ) -> None:
     # Make spatial grid partition for collision detection
@@ -106,12 +108,12 @@ def draw_sparse_flow_field(
     for _ in tqdm(range(configuration.NUM_SPARSE_LINES_Y), desc="Rows"):
         pos.x = 0
         for _ in tqdm(
-            range(configuration.NUM_SPARSE_LINES_X), desc="Particles", leave=False
+            range(configuration.NUM_SPARSE_LINES_X), desc="Points", leave=False
         ):
             # PERF: Add multiprocessing for faster render times
             end_point = trace_line(
                 ctx,
-                grid,
+                angles,
                 pos,
                 200,
                 spatial_grid=spatial_grid,
@@ -123,7 +125,7 @@ def draw_sparse_flow_field(
 
 def draw_full_flow_field(
     ctx: Context[ImageSurface],
-    grid: list[list[Particle]],
+    angles: npt.NDArray[np.float64],
     check_collision: bool,
 ) -> None:
     # Make spatial grid partition for collision detection
@@ -132,12 +134,12 @@ def draw_full_flow_field(
     else:
         spatial_grid = None
 
-    for row in tqdm(grid, desc="Rows"):
-        for particle in tqdm(row, desc="Particles", leave=False):
+    for row in tqdm(angles, desc="Rows"):
+        for particle in tqdm(row, desc="Points", leave=False):
             # PERF: Add multiprocessing for faster render times
             end_point = trace_line(
                 ctx,
-                grid,
+                angles,
                 particle.pos(),
                 200,
                 spatial_grid=spatial_grid,

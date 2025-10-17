@@ -1,14 +1,15 @@
 import math
-import random
+
+import numpy as np
+import numpy.typing as npt
 
 import configuration
 from math_utils import angle_to_vector, lerp
-from particle import Particle
-from vector import Vec2, Vec3
+from vector import Vec2
 
 
 def interpolated_angle(
-    grid: list[list[Particle]],
+    angles: npt.NDArray[np.float64],
     pos: Vec2,
 ) -> float:
     gx, gy = pos.x * configuration.NUM_COLS, pos.y * configuration.NUM_ROWS
@@ -18,10 +19,10 @@ def interpolated_angle(
     y0 = min(int(gy) + 1, configuration.NUM_ROWS - 1)
 
     # angles at the four closest grid points
-    angle_00 = grid[y0][x0].angle
-    angle_01 = grid[y1][x0].angle
-    angle_10 = grid[y0][x1].angle
-    angle_11 = grid[y1][x1].angle
+    angle_00 = angles[y0, x0]
+    angle_01 = angles[y1, x0]
+    angle_10 = angles[y0, x1]
+    angle_11 = angles[y1, x1]
 
     # convert the angles to a vector
     vector_00 = angle_to_vector(angle_00)

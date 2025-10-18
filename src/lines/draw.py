@@ -6,7 +6,7 @@ import math
 import numpy as np
 import numpy.typing as npt
 from cairo import Context, ImageSurface, LinearGradient
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 import configuration
 from grid import SpatialGrid
@@ -128,20 +128,23 @@ def draw_full_flow_field(
     angles: npt.NDArray[np.float64],
     check_collision: bool,
 ) -> None:
+    x_step = 1 / configuration.NUM_ROWS
+    y_step = 1 / configuration.NUM_COLS
+
     # Make spatial grid partition for collision detection
     if check_collision:
         spatial_grid = SpatialGrid()
     else:
         spatial_grid = None
 
-    for row in tqdm(angles, desc="Rows"):
-        for particle in tqdm(row, desc="Points", leave=False):
-            # PERF: Add multiprocessing for faster render times
-            end_point = trace_line(
-                ctx,
-                angles,
-                particle.pos(),
-                200,
-                spatial_grid=spatial_grid,
-            )
-            stroke_line(ctx, particle.pos(), end_point)
+    for iy, ix in tqdm(np.ndindex(angles.shape), total=angles.size, desc="Pixels"):  # pyright: ignore[reportAny]
+        # PERF: Add multiprocessing for faster render times
+        pos = Vec2(x_step * ix, y_step * iy)  # pyright: ignore[reportAny]
+        end_point = trace_line(
+            ctx,
+            angles,
+            pos,
+            200,
+            spatial_grid=spatial_grid,
+        )
+        stroke_line(ctx, pos, end_point)

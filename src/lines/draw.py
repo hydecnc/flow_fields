@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import copy
 import math
+import random
 
 import numpy as np
 import numpy.typing as npt
-from cairo import Context, ImageSurface, LinearGradient
-from tqdm import tqdm, trange
+from cairo import LINE_CAP_ROUND, LINE_JOIN_ROUND, Context, ImageSurface, LinearGradient
+from tqdm import tqdm
 
 import configuration
 from grid import SpatialGrid
@@ -31,6 +32,9 @@ def trace_line(
         num_steps (int): The number of steps (approximation) that will be used to draw the line.
         spatial_grid (SpatialGrid | None): Spatial Grid designed to calculate collision. If None, then no collision is calculated.
     """
+    ctx.set_line_cap(LINE_CAP_ROUND)
+    ctx.set_line_join(LINE_JOIN_ROUND)
+
     check_collision = spatial_grid is not None
     pos = copy.copy(start_point)
 
@@ -81,12 +85,13 @@ def draw_flow_field(
     check_collision: bool = True,
     start_method: str | None = None,
 ) -> None:
-    # TODO: Start drawing lines in more varying positions
     match start_method:
         case "sparse":
             draw_sparse_flow_field(ctx, angles, check_collision)
         case "full":
             draw_full_flow_field(ctx, angles, check_collision)
+        case "random":
+            draw_random_flow_field(ctx, angles, check_collision)
         case _:
             pass
 
@@ -147,4 +152,21 @@ def draw_full_flow_field(
             200,
             spatial_grid=spatial_grid,
         )
+        stroke_line(ctx, pos, end_point)
+
+
+def draw_random_flow_field(
+    ctx: Context[ImageSurface],
+    angles: npt.NDArray[np.float64],
+    check_collision: bool,
+) -> None:
+    # Make spatial grid partition for collision detection
+    if check_collision:
+        spatial_grid = SpatialGrid()
+    else:
+        spatial_grid = None
+
+    for i in range(2000):
+        pos = Vec2(random.random(), random.random())
+        end_point = trace_line(ctx, angles, pos, 200, spatial_grid=spatial_grid)
         stroke_line(ctx, pos, end_point)

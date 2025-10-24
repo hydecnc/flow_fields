@@ -7,7 +7,7 @@ import cairo
 from vector import Vec3
 
 # Image & grid configuration
-WIDTH, HEIGHT = 1000, 1000
+WIDTH, HEIGHT = 2000, 2000
 SUPERSAMPLE = 1
 SCALED_WIDTH, SCALED_HEIGHT = WIDTH * SUPERSAMPLE, HEIGHT * SUPERSAMPLE
 BACKGROUND_COLOR = Vec3(0.0, 0.0, 0.0)

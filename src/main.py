@@ -55,7 +55,7 @@ def main() -> None:
     # Get angles on each grid points
     angles = setup_angle_grid()
 
-    draw_flow_field(ctx, angles, start_method="sparse", check_collision=True)
+    draw_flow_field(ctx, angles, start_method="random", check_collision=True)
 
     # Supersampling; scale down the image.
     if configuration.SUPERSAMPLE > 1:

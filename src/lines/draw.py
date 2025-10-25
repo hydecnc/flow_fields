@@ -12,7 +12,21 @@ from tqdm import tqdm
 import configuration
 from grid import SpatialGrid
 from lines.utils import interpolated_angle
+from math_utils import lerp
 from vector import Vec2
+
+
+def draw_lines(
+    ctx: Context[ImageSurface],
+    angles: npt.NDArray[np.float64],
+    start_point: Vec2,
+    num_steps: int,
+    spatial_grid: SpatialGrid | None = None,
+) -> None:
+    end_point = trace_line(
+        ctx, angles, start_point, num_steps, spatial_grid=spatial_grid
+    )
+    stroke_line(ctx, start_point, end_point)
 
 
 def trace_line(
@@ -67,6 +81,77 @@ def trace_line(
         ctx.line_to(pos.x, pos.y)
         ctx.move_to(pos.x, pos.y)
     return pos
+
+
+def draw_circles(
+    ctx: Context[ImageSurface],
+    angles: npt.NDArray[np.float64],
+    start_point: Vec2,
+    num_steps: int,
+    spatial_grid: SpatialGrid | None = None,
+) -> None:
+    """
+    Draw a circles along the line traced out by starting at start_point given the number of steps and other information.
+
+    Args:
+        ctx (Context): The pycairo context to draw to.
+        grid (npt.NDArray[np.float64]): Grid containing the generated angles to be used for the lines.
+        start_point (Vec2): Vec2 in [0, 1] x [0, 1] where the line starts.
+        num_steps (int): The number of steps (approximation) that will be used to draw the line.
+        spatial_grid (SpatialGrid | None): Spatial Grid designed to calculate collision. If None, then no collision is calculated.
+    """
+    check_collision = spatial_grid is not None
+
+    # ctx.set_line_width(0.002)
+    ctx.set_source(configuration.circle.color)
+
+    for step in range(num_steps):
+        radius_scale = lerp(step / num_steps, 0.5, 1.5)
+        ctx.new_sub_path()
+        ctx.arc(
+            start_point.x,
+            start_point.y,
+            configuration.circle.radius * radius_scale,
+            0,
+            2 * math.pi,
+        )
+        ctx.fill()
+
+        angle = interpolated_angle(angles, start_point)
+
+        # NOTE: Try out Runge Kutta approximation
+
+        x_step = configuration.circle.step_size * math.cos(angle)
+        y_step = configuration.circle.step_size * math.sin(angle)
+        start_point += Vec2(x_step, y_step)
+
+        # if the curve goes outside the line, stop
+        if (
+            0 > start_point.x
+            or 1 < start_point.x
+            or 0 > start_point.y
+            or 1 < start_point.y
+        ):
+            break
+
+        if check_collision:
+            # check for collision at current position and if there is a collision, stop
+            collision = spatial_grid.check_collision(start_point)
+            if collision:
+                # ctx.set_source_rgb(1.0, 0.0, 0.0)
+                # ctx.new_sub_path()
+                # ctx.arc(
+                #     start_point.x,
+                #     start_point.y,
+                #     configuration.circle.radius * radius_scale,
+                #     0,
+                #     2 * math.pi,
+                # )
+                # ctx.fill()
+                break
+
+            spatial_grid.add_position(start_point)
+    ctx.stroke()
 
 
 def stroke_line(ctx: Context[ImageSurface], start_point: Vec2, end_point: Vec2) -> None:
@@ -166,7 +251,8 @@ def draw_random_flow_field(
     else:
         spatial_grid = None
 
-    for i in range(2000):
+    for i in range(200):
+        # TODO: Clean up trace circle code and make switching from line to circles easy
         pos = Vec2(random.random(), random.random())
-        end_point = trace_line(ctx, angles, pos, 200, spatial_grid=spatial_grid)
-        stroke_line(ctx, pos, end_point)
+        # draw_circles(ctx, angles, pos, 200, spatial_grid=spatial_grid)
+        draw_lines(ctx, angles, pos, 200, spatial_grid=spatial_grid)

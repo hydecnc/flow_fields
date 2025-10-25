@@ -45,5 +45,14 @@ class Line:
     step_size: float = 0.003
 
 
+@final
+@dataclass
+class Circle:
+    radius: float = 0.004
+    color: cairo.Pattern = cairo.SolidPattern(0.0, 0.7, 1.0)
+    step_size: float = radius * 3
+
+
 arrow = Arrow()
 line = Line()
+circle = Circle()

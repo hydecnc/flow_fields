@@ -48,10 +48,12 @@ class SpatialGrid:
         for p in partition:
             if p is position:
                 continue
+            # TODO: Figure out how to set better collision threshold
             if (p - position).norm() < configuration.line.width / 2:
-                # print(
-                #     f"Collision with {p} and {position}, {(p - position).norm()} {configuration.line.width}"
-                # )
+                # if (p - position).norm() < configuration.circle.radius * 2:
+                print(
+                    f"Collision with {p} and {position}, distance: {(p - position).norm()}"
+                )
                 return True
         return False
 
